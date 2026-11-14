@@ -4,6 +4,7 @@ package algorithms;
 import java.util.*;
 
 public class AhoCorasick {
+
     private static class Node {
         Map<Character, Node> children = new HashMap<>();
         Node fail;
@@ -18,11 +19,13 @@ public class AhoCorasick {
         }
 
         Node current = root;
+
         for (char c : pattern.toCharArray()) {
             current = current.children.computeIfAbsent(
                     c, k -> new Node()
             );
         }
+
         current.output.add(pattern);
     }
 
@@ -79,6 +82,34 @@ public class AhoCorasick {
             }
 
             matches += current.output.size();
+        }
+
+        return matches;
+    }
+
+    public List<String> searchWithPositions(String text) {
+        List<String> matches = new ArrayList<>();
+        Node current = root;
+
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+
+            while (current != root &&
+                    !current.children.containsKey(c)) {
+                current = current.fail;
+            }
+
+            if (current.children.containsKey(c)) {
+                current = current.children.get(c);
+            }
+
+            for (String pattern : current.output) {
+                int start = i - pattern.length() + 1;
+
+                matches.add(
+                        pattern + " found at index " + start
+                );
+            }
         }
 
         return matches;
