@@ -1,16 +1,25 @@
 ﻿=== Algorithm Tests ===
-Aho-Corasick matches: 4
-KMP matches: 4
-Test passed!
+PASS: ahishers | Matches: 4
+PASS: aaaa | Matches: 9
+PASS: abcdef | Matches: 0
+PASS: banana | Matches: 4
+PASS: abcabc | Matches: 6
+All 5 tests passed!
+
+=== Match Positions ===
+his found at index 1
+she found at index 3
+he found at index 4
+hers found at index 4
 
 === Benchmark Results ===
 Patterns,TextLength,AC_ms,KMP_ms,Matches
-10,1000,0.2972,1.3523,0
-10,10000,1.0612,3.0306,34
-10,100000,2.2167,7.6777,226
-100,1000,0.0167,0.6650,29
-100,10000,0.2108,7.4016,219
-100,100000,2.1273,73.6285,2419
-1000,1000,0.0389,6.6549,251
-1000,10000,0.3553,74.0476,2465
-1000,100000,3.3390,742.7580,24477
+10,1000,0.2116,1.1292,0
+10,10000,0.3157,0.7438,34
+10,100000,1.8335,7.7768,226
+100,1000,0.0229,0.7287,29
+100,10000,0.2319,8.8259,219
+100,100000,1.9557,80.2742,2419
+1000,1000,0.0611,6.6126,251
+1000,10000,0.3516,82.8038,2465
+1000,100000,3.0626,765.4705,24477

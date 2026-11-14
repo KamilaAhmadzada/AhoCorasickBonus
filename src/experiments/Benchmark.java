@@ -11,18 +11,23 @@ public class Benchmark {
     private static final int[] PATTERN_COUNTS = {10, 100, 1000};
     private static final int[] TEXT_LENGTHS = {1000, 10000, 100000};
     private static final int RUNS = 5;
+    private static final int WARMUP = 3;
     private static final String ALPHABET = "ABCD";
+
     private static volatile int sink;
 
     public static void run() {
+
         Random random = new Random(42);
 
-        System.out.println("Patterns,TextLength,AC_ms,KMP_ms,Matches");
+        System.out.println(
+                "Patterns,TextLength,AC_ms,KMP_ms,Matches"
+        );
 
         for (int patternCount : PATTERN_COUNTS) {
-            List<String> patterns = generatePatterns(
-                    patternCount, random
-            );
+
+            List<String> patterns =
+                    generatePatterns(patternCount, random);
 
             AhoCorasick ac = new AhoCorasick();
 
@@ -33,33 +38,43 @@ public class Benchmark {
             ac.buildFailureLinks();
 
             for (int textLength : TEXT_LENGTHS) {
+
                 String text = randomString(textLength, random);
+
+                for (int w = 0; w < WARMUP; w++) {
+                    sink = ac.search(text);
+                    sink = runKMP(text, patterns);
+                }
 
                 double acTotal = 0;
                 double kmpTotal = 0;
                 int matches = 0;
 
                 for (int run = 0; run < RUNS; run++) {
+
                     long start = System.nanoTime();
-                    matches = ac.search(text);
-                    sink = matches;
-                    acTotal += System.nanoTime() - start;
+
+                    int acMatches = ac.search(text);
+
+                    long acTime = System.nanoTime() - start;
 
                     start = System.nanoTime();
 
-                    int kmpMatches = 0;
-                    for (String pattern : patterns) {
-                        kmpMatches += KMP.search(text, pattern);
-                    }
+                    int kmpMatches = runKMP(text, patterns);
 
-                    sink = kmpMatches;
-                    kmpTotal += System.nanoTime() - start;
+                    long kmpTime = System.nanoTime() - start;
 
-                    if (matches != kmpMatches) {
+                    if (acMatches != kmpMatches) {
                         throw new AssertionError(
-                                "Match counts differ"
+                                "Match count mismatch"
                         );
                     }
+
+                    matches = acMatches;
+                    sink = acMatches + kmpMatches;
+
+                    acTotal += acTime;
+                    kmpTotal += kmpTime;
                 }
 
                 System.out.printf(
@@ -73,6 +88,18 @@ public class Benchmark {
                 );
             }
         }
+    }
+
+    private static int runKMP(
+            String text, List<String> patterns) {
+
+        int total = 0;
+
+        for (String pattern : patterns) {
+            total += KMP.search(text, pattern);
+        }
+
+        return total;
     }
 
     private static List<String> generatePatterns(
@@ -93,9 +120,11 @@ public class Benchmark {
         StringBuilder sb = new StringBuilder(length);
 
         for (int i = 0; i < length; i++) {
-            sb.append(ALPHABET.charAt(
-                    random.nextInt(ALPHABET.length())
-            ));
+            sb.append(
+                    ALPHABET.charAt(
+                            random.nextInt(ALPHABET.length())
+                    )
+            );
         }
 
         return sb.toString();
